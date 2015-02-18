@@ -62,8 +62,10 @@ namespace Projections
 
         public static decimal Compute(int age, decimal prevYearValue)
         {
-            var factor = RmdFactorFromAge[age];
-            return (decimal)(factor * (double)prevYearValue);
+            double factor;
+            if (!RmdFactorFromAge.TryGetValue(age, out factor))
+                return 0m;
+            return (decimal)( (double)prevYearValue / factor);
         }
 
     }

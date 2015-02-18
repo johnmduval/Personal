@@ -8,7 +8,7 @@ namespace Projections
 {
     public class PreRetirement1
     {
-        public void RothConversion(decimal convertToRothAmount, double taxRate, List<AccountGrowthInfo> growthInfoList)
+        public void RothConversion(decimal convertToRothAmount, double taxRate, List<AccountInfo> growthInfoList)
         {
             var preTaxGrowthInfo = growthInfoList.Single(e => e.Desc == "pretax");
             var postTaxGrowthInfo = growthInfoList.Single(e => e.Desc == "posttax");
@@ -17,23 +17,34 @@ namespace Projections
                 throw new Exception("convertToRothAmount too high");
 
             preTaxGrowthInfo.StartingValue -= convertToRothAmount;
-            var addToRothAmount = (double)convertToRothAmount*(1.0 - taxRate);
+            var addToRothAmount = (double)convertToRothAmount*(1.0 - taxRate / 100);
             postTaxGrowthInfo.StartingValue += (decimal)addToRothAmount;
         }
 
-        public void Run(int startingYear, int retirementYear, List<AccountGrowthInfo> growthInfoList)
+        public void Run(int startingYear, int retirementYear, List<AccountInfo> growthInfoList)
         {
-            growthInfoList.ForEach(e => e.ProjectionValue = e.StartingValue);
+            growthInfoList.ForEach(e => e.CurrentValue = e.StartingValue);
+            Console.WriteLine(AnnualDebugInfo.Header);
             for (int year = startingYear; year < retirementYear; year++)
             {
                 growthInfoList.ForEach(e =>
                 {
-                    e.ProjectionValue += e.AnnualContributions;
-                    e.ProjectionValue = (decimal)((double)e.ProjectionValue * (1 + e.AnnualReturnPercent / 100.0));
+                    e.CurrentValue += e.AnnualContributions;
+                    e.CostBasis += e.AnnualContributions;
+                    e.CurrentValue = (decimal)((double)e.CurrentValue * (1 + e.AnnualReturnPercent / 100.0));
                 });
 
-                var vals = string.Join("\t", growthInfoList.Select(e => e.ProjectionValue.ToString("C0")));
-                Console.WriteLine("{0} ({1}): {2}", year, year - 1970, vals);
+                var debug = new AnnualDebugInfo
+                {
+                    Year = year, 
+                    Age = year - 1970,
+                    Rmd = 0.0m, 
+                };
+                debug.CurrentValue["taxable"] = growthInfoList.Single(e => e.Desc == "taxable").CurrentValue;
+                debug.CurrentValue["pretax"] = growthInfoList.Single(e => e.Desc == "pretax").CurrentValue;
+                debug.CurrentValue["posttax"] = growthInfoList.Single(e => e.Desc == "posttax").CurrentValue;
+
+                Console.WriteLine("{0}", debug);
             }
         }
 

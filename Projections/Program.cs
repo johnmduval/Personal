@@ -12,13 +12,13 @@ namespace Projections
         static void Main(string[] args)
         {
             // key dates/ages
-            var retirementAge = 60;
-            var deathAge1 = 90;
-            var deathAge2 = 95;
+            const int retirementAge = 65;
+            const int deathAge1 = 85;
+            const int deathAge2 = 95;
             var startingYear = DateTime.Now.Year;
-            var retirementYear = 1970 + retirementAge;
-            var deathYear1 = 1970 + deathAge1;
-            var deathYear2 = 1970 + deathAge2;
+            const int retirementYear = 1970 + retirementAge;
+            const int deathYear1 = 1970 + deathAge1;
+            const int deathYear2 = 1970 + deathAge2;
 
             #region current account balances
             // current balances, by tax treatment
@@ -48,28 +48,32 @@ namespace Projections
             };
             #endregion
 
+            decimal annualContributionsTaxable = decimal.Parse("50,000");
+            decimal annualContributionsPretax = decimal.Parse("52,000");
+
             // annual return on investments (averaged)
-            var annualReturnPercent = 5.0;
+            const double annualReturnPercent = 6;
 
             // ------------------------------------------------
             // pre-retirement info
-            var convertToRothAmount = decimal.Parse("200,000");
-            var incomeTaxCurrent = 39.5;
-            var longTermCapGainsRateCurrent = 20.0; 
-            var growthInfoList = new List<AccountGrowthInfo>
-            {
-                new AccountGrowthInfo { Desc = "taxable", StartingValue = taxableAccountValues.Sum(), AnnualContributions = decimal.Parse("50,000"), AnnualReturnPercent = annualReturnPercent },
-                new AccountGrowthInfo { Desc = "pretax", StartingValue = preTaxAccountValues.Sum(), AnnualContributions = decimal.Parse("52,000"), AnnualReturnPercent = annualReturnPercent },
-                new AccountGrowthInfo { Desc = "posttax", StartingValue = postTaxAccountValues.Sum(), AnnualContributions = decimal.Parse("0"), AnnualReturnPercent = annualReturnPercent },
-            };
+            var convertToRothAmount = decimal.Parse("1,150,000");
+            const double incomeTaxCurrent = 39.5;
 
             // ------------------------------------------------
             // post-retirement info
-            var incomeTaxRetirement = 39.5;
-            var longTermCapGainsRateRetirement = 20.0;
+            const double incomeTaxRetirement = 60;
+            const double longTermCapGainsRateRetirement = 20.0;
             var drawdownInfo = new DrawdownInfo
             {
-                AnnualSpending = decimal.Parse("250,000")
+                AnnualSpending = decimal.Parse("200,000"),
+                InflationRate = 3.2
+            };
+
+            var growthInfoList = new List<AccountInfo>
+            {
+                new AccountInfo { Desc = "taxable", StartingValue = taxableAccountValues.Sum(), AnnualContributions = annualContributionsTaxable, AnnualReturnPercent = annualReturnPercent, TaxRate = longTermCapGainsRateRetirement },
+                new AccountInfo { Desc = "pretax", StartingValue = preTaxAccountValues.Sum(), AnnualContributions = annualContributionsPretax, AnnualReturnPercent = annualReturnPercent, TaxRate = incomeTaxRetirement },
+                new AccountInfo { Desc = "posttax", StartingValue = postTaxAccountValues.Sum(), AnnualContributions = decimal.Parse("0"), AnnualReturnPercent = annualReturnPercent, TaxRate = 0.0 },
             };
 
             var preRetire = new PreRetirement1();
