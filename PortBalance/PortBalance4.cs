@@ -7,10 +7,30 @@ using System.Text;
 
 namespace PortBalance
 {
+
+    // tax efficiency:  https://www.bogleheads.org/wiki/Principles_of_tax-efficient_fund_placement
+    // ___Efficient___ (Place anywhere)
+    //Low-yield money market, cash, short-term bond funds
+    //Tax-managed stock funds
+    //Large-cap and total-market stock index funds
+    //Balanced index funds
+    //Small-cap or mid-cap index funds
+    //Value index funds
+
+    //___Moderately inefficient___
+    //Moderate-yield money market, bond funds
+    //Total-market bond funds
+    //Active stock funds
+
+    //___Very inefficient___  (Place in Tax-Free or Tax-Deferred)
+    //Real estate or REIT funds
+    //High-turnover active funds
+    //High-yield corporate bonds
+
     public class InvestmentCategory
     {
         public string Name { get; set; }
-        public int TaxEfficiency { get; set; }  // lower = not efficient, higher = more efficient
+        public int TaxEfficiency { get; set; }  // lower (1) = not efficient, higher (5) = more efficient
         public decimal TargetPercent { get; set; }
         public IEnumerable<SecurityAndExpenseRatio> Securities { get; set; }
     }
@@ -31,56 +51,85 @@ namespace PortBalance
 
     public class PortBalance4
 	{
-		public static void Go()
-		{
-            var inputCsv1 = @"C:\Users\admin\Downloads\john.csv";
-            var inputCsv2 = @"C:\Users\admin\Downloads\sue.csv";
+        private static readonly string inputCsv1 = @"C:\Users\admin\Downloads\john.csv";
+        private static readonly string inputCsv2 = @"C:\Users\admin\Downloads\sue.csv";
 
-            var newInvestmentAmount = 13000.0m;
+        private static readonly string[] taxFreeAccounts =
+        {
+            "130392103", // john roth
+            "216737438", // sue roth
+        };
+
+        private static readonly string[] taxDeferredAccounts =
+        {
+            "130510777", // john rollover
+            "210273953", // john trad
+            "414351547", // john simple
+            "130516597", // sue rollover
+            "210273929", // sue trad
+            "24748", // sue 401k
+        };
+
+        public static void Go()
+		{ 
+            var newInvestmentAmount = 91000.0m;
 		    var liquidateBadSecurities = false;  // sell any Eliminate=true securities from tax-advantaged accounts
 
 		    var targetPercents = new List<InvestmentCategory>
 		    {
-                // 
-		        new InvestmentCategory { Name = "1 US Large Cap", TargetPercent = 20.0m, TaxEfficiency = 3,
+                // U.S. stocks
+		        new InvestmentCategory { Name = "1 US Large Cap", TargetPercent = 23.5m, TaxEfficiency = 3,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "SPY", ExpenseRatio = 0.09m, Description = "S&P 500"},
 		                                 new SecurityAndExpenseRatio {Symbol = "PEOPX", ExpenseRatio = 0.50m, Description = "S&P 500", Eliminate = true },
 		                                 new SecurityAndExpenseRatio {Symbol = "FBGRX", ExpenseRatio = 0.74m, Description = "Blue Chip", Eliminate = true },
-		                                 new SecurityAndExpenseRatio {Symbol = "FUSVX", ExpenseRatio = 0.05m, Description = "S&P 500 80%"}, }
+		                                 new SecurityAndExpenseRatio {Symbol = "FUSVX", ExpenseRatio = 0.05m, Description = "S&P 500 80%"}, }   // Sue 401k
 		        },
 		        new InvestmentCategory { Name = "2 US Broad Mkt", TargetPercent = 20.0m, TaxEfficiency = 3,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "IWV", ExpenseRatio = 0.20m, Description = "Russell 3000", Eliminate = true }, 
 		                                 new SecurityAndExpenseRatio {Symbol = "FSEVX", ExpenseRatio = 0.07m, Description = "Mid / Small Cap"}, }
 		        },
-                new InvestmentCategory { Name = "3 US Small Cap", TargetPercent = 15.0m, TaxEfficiency = 4,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "IJR", ExpenseRatio = 0.17m, Description = "S&P SmallCap 600"}, }
+                new InvestmentCategory { Name = "3 US Small Cap", TargetPercent = 11.5m/*15.0m*/, TaxEfficiency = 4,
+		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "IJR", ExpenseRatio = 0.12m, Description = "S&P SmallCap 600"}, }
 		        },
                 new InvestmentCategory { Name = "4 US Real Estate", TargetPercent = 5.0m, TaxEfficiency = 2,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "IYR", ExpenseRatio = 0.46m, Description = "Dow Jones U.S. Real Estate Index", Eliminate = true},
 		                                 new SecurityAndExpenseRatio {Symbol = "SCHH", ExpenseRatio = 0.07m, Description = "S&P SmallCap 600"}, }
 		        },
+
+                // International stocks
                 new InvestmentCategory { Name = "5 Intl Large/Mid Cap", TargetPercent = 15.0m, TaxEfficiency = 5,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "ACWX", ExpenseRatio = 0.34m, Description = "All Country World Index (ACWI)", Eliminate = true },
                                          new SecurityAndExpenseRatio {Symbol = "VEA", ExpenseRatio = 0.09m, Description = "FTSE Developed ex North America Index" },
-		                                 new SecurityAndExpenseRatio {Symbol = "VTMGX", ExpenseRatio = 0.09m, Description = "FTSE Developed ex North America Index"}, }                     
+		                                 new SecurityAndExpenseRatio {Symbol = "VTMGX", ExpenseRatio = 0.09m, Description = "FTSE Developed ex North America Index"}, }     // Sue 401k
 		        },
                 new InvestmentCategory { Name = "6 Intl Small Cap", TargetPercent = 5.0m, TaxEfficiency = 5,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "SCZ", ExpenseRatio = 0.40m, Description = "Europe Asia Far East (EAFE) Small Cap"}, }
 		        },
                 new InvestmentCategory { Name = "7 Intl BRIC", TargetPercent = 10.0m, TaxEfficiency = 5,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "VEIEX", ExpenseRatio = 0.33m, Description = "Brazil Russia India China"},
-		                                 new SecurityAndExpenseRatio {Symbol = "BKF", ExpenseRatio = 0.67m, Description = "Brazil Russia India China", Eliminate = true }, }
+                                         //new SecurityAndExpenseRatio {Symbol = "BKF", ExpenseRatio = 0.67m, Description = "Brazil Russia India China", Eliminate = true }, 
+                    }
 		        },
+
+                // U.S. bonds
                 new InvestmentCategory { Name = "8 Bonds", TargetPercent = 5.0m, TaxEfficiency = 1,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "AGG", ExpenseRatio = 0.08m, Description = "Barclays U.S. Aggregate Bond Index"},
-		                                 new SecurityAndExpenseRatio {Symbol = "FSITX", ExpenseRatio = 0.10m, Description = "Barclays U.S. Aggregate Bond Index"}, }
+		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "AGG", ExpenseRatio = 0.08m, Description = "iShares Core US Aggregate Bond"},
+		                                 new SecurityAndExpenseRatio {Symbol = "FSITX", ExpenseRatio = 0.10m, Description = "Fidelity Spartan US Bond Idx Advtg"}, }    // Sue 401k
 		        },
+                //new InvestmentCategory { Name = "8a High-Yield Bonds", TargetPercent = 5.0m, TaxEfficiency = 1,
+                //    Securities = new[] { new SecurityAndExpenseRatio {Symbol = "???", ExpenseRatio = 0.00m, Description = "Barclays U.S. Aggregate Bond Index"},
+                //    }
+                //},
                 new InvestmentCategory { Name = "9 Inflation Protected", TargetPercent = 5.0m, TaxEfficiency = 1,
 		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "TIP", ExpenseRatio = 0.20m, Description = "U.S. Treasury Inflation Protected Securities"}, }
 		        },
+
+                // Other
 		        new InvestmentCategory { Name = "9a Money Market/Cash", TargetPercent = 0.0m, TaxEfficiency = 5,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "FTEXX", ExpenseRatio = 0.09m, Description = "Municipal Money Market"},
-		                                 new SecurityAndExpenseRatio {Symbol = "FDRXX", ExpenseRatio = 0.24m, Description = "Cash Reserves"}, }
+		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "FTEXX**", ExpenseRatio = 0.09m, Description = "Municipal Money Market"},
+		                                 new SecurityAndExpenseRatio {Symbol = "FDRXX**", ExpenseRatio = 0.24m, Description = "Cash Reserves"}, 
+		                                 new SecurityAndExpenseRatio {Symbol = "CORE**", ExpenseRatio = 0.00M, Description = "FDIC-INSURED DEPOSIT SWEEP"}, 
+                    }
 		        },
             };
 
@@ -91,17 +140,16 @@ namespace PortBalance
 		        new { Symbol = "SCHH", LatestPrice = 35.33m },
 		    };
 
-		    var taxAdvantagedAccounts = new[]
+
+
+            // verify target % adds up to 100%
+		    var totalPct = targetPercents.Sum(e => e.TargetPercent);
+		    if (totalPct != 100.0m)
 		    {
-                "130392103",    // john roth
-                "130510777",    // john rollover
-                "210273953",    // john trad
-                "414351547",    // john simple
-                "130516597",    // sue rollover
-                "210273929",    // sue trad
-                "216737438",    // sue roth
-                "24748",        // sue 401k
-		    };
+		        Console.WriteLine("Target percentages ({0}) don't add up to 100%", totalPct);
+		        Console.ReadLine();
+                return;
+		    }
 
             // Build map [security symbol] -> [category name]
 		    var securityToCategoryMap = new Dictionary<string, string>();
@@ -115,17 +163,22 @@ namespace PortBalance
 		    if (!File.Exists(inputCsv1) || !File.Exists(inputCsv2))
 		    {
 		        Console.WriteLine("Input file(s) not found");
-		        return;
+                Console.ReadLine();
+                return;
 		    }
             var currentPositions1 = ReadCsv(inputCsv1, targetPercents);
-            var currentPositions2 = ReadCsv(inputCsv2, targetPercents);
-            
+            var currentPositions2 = ReadCsv(inputCsv2, targetPercents, "X10830658");
+
+		    var aggregateCurrentPositions = currentPositions1.Union(currentPositions2).ToList();
+            AnalyzeTaxEfficiency(aggregateCurrentPositions);
+
             // If you know you're going to be selling some securities (within tax-advantaged accounts, where there is no immediate tax implication), 
             // they will be marked as "Eliminate=true" and we'll add the sale value to newInvestmentAmount
             Console.WriteLine("New investment amount: " + newInvestmentAmount); 
             if (liquidateBadSecurities)
 		    {
                 Console.WriteLine("Processing securities with Eliminate=true...");
+		        var taxAdvantagedAccounts = taxDeferredAccounts.Union(taxFreeAccounts);
                 newInvestmentAmount += LiquidateBadSecurities(currentPositions1, targetPercents, taxAdvantagedAccounts);
                 newInvestmentAmount += LiquidateBadSecurities(currentPositions2, targetPercents, taxAdvantagedAccounts);
                 Console.WriteLine("New investment amount: " + newInvestmentAmount);
@@ -269,11 +322,19 @@ namespace PortBalance
 
 		    foreach (var kvp in totalPercentByCategoryGroup)
 		    {
-		        Console.WriteLine("{0} Total: {1}", StringUtils.MakeFixedWidth(kvp.Key, 15), kvp.Value.ToString("#0.00"));  
+		        Console.WriteLine("{0} Total: {1}", StringUtils.MakeFixedWidth(kvp.Key, 25), kvp.Value.ToString("#0.00"));  
 		    }
 
             Console.ReadLine();
 		}
+
+        private static void AnalyzeTaxEfficiency(List<Position> positions)
+        {
+            // group each position by tax efficiency & account type (taxable, tax-deferred, tax-free)
+            // print out grid ordered by tax efficiency (vertical = tax efficiency, horiz = account type)
+            // later...
+
+        }
 
         private static string GetCategoryGroup(string category)
         {
@@ -335,7 +396,7 @@ namespace PortBalance
             return valueOfSoldPositions;
         }
 
-        static List<Position> ReadCsv(string inputCsv, IEnumerable<InvestmentCategory> categories)
+        static List<Position> ReadCsv(string inputCsv, IEnumerable<InvestmentCategory> categories, string ignoreAccount = null)
 		{
 		    if (!File.Exists(inputCsv))
 		        return new List<Position>();
@@ -352,22 +413,31 @@ namespace PortBalance
 			}
 
 			// remove rows which are not the securities we're interested in
-            var categorizedSecurityRows = new List<CsvRow>();
-            var uncategorizedSecurityRows = new List<CsvRow>();
-		    var categorizedSecuritySymbols = categories.SelectMany(e => e.Securities.Select(e2 => e2.Symbol));
+            var categorizedSecurityRows = new List<CsvRow>();   // interested in these
+            var uncategorizedSecurityRows = new List<CsvRow>(); // not interested (category unknown)
+            var accountIgnoredRows = new List<CsvRow>();        // not interested (account ignored)
+            var categorizedSecuritySymbols = categories.SelectMany(e => e.Securities.Select(e2 => e2.Symbol));
             rowList.ForEach(e =>
             {
-                if (categorizedSecuritySymbols.Contains(e[1]))
+                var account = e[0];
+                var symbol = e[1];
+                if (ignoreAccount != null && account == ignoreAccount)
                 {
-                    categorizedSecurityRows.Add(e);
+                    accountIgnoredRows.Add(e);
+                    Console.WriteLine("Ignoring: file={0}, acct={1}, symbol={2}", inputCsv, account, symbol);
                     return;
                 }
-                uncategorizedSecurityRows.Add(e);
-                Console.WriteLine("Uncategorized security: {0}", e[1]);
+                
+                if (!categorizedSecuritySymbols.Contains(symbol))
+                {
+                    uncategorizedSecurityRows.Add(e);
+                    Console.WriteLine("Uncategorized security: {0}", symbol);
+                    return;
+                }
+                categorizedSecurityRows.Add(e);
             });
-			var relevantSecurities = rowList.Where(e => categorizedSecuritySymbols.Contains(e[1])).ToList();
 
-			var positions = relevantSecurities.Select(e => new Position
+            var positions = categorizedSecurityRows.Select(e => new Position
 			{
 				Security = e[1],
 				OriginalQuantity = decimal.Parse(e[3]),
@@ -375,7 +445,7 @@ namespace PortBalance
 			}).ToList();
 
 			var pricesFromSecurities = new Dictionary<string, decimal>();
-			foreach (var row in relevantSecurities)
+            foreach (var row in categorizedSecurityRows)
 			{
 				var security = row[1];
 				if (pricesFromSecurities.ContainsKey(security))
