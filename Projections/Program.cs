@@ -28,6 +28,8 @@ namespace Projections
                 decimal.Parse("1,030,000"),
             };
 
+            taxableAccountValues[0] -= 450000;
+
             // pre-tax (trad)
             var preTaxAccountValues = new decimal[]
             {
@@ -56,7 +58,7 @@ namespace Projections
 
             // ------------------------------------------------
             // pre-retirement info
-            var convertToRothAmount = decimal.Parse("1,150,000");
+            var convertToRothAmount = decimal.Parse("0,000,000");
             const double incomeTaxCurrent = 39.5;
 
             // ------------------------------------------------
