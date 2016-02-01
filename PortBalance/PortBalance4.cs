@@ -71,6 +71,11 @@ namespace PortBalance
             "24748", // sue 401k
         };
 
+        private static decimal ComputeNewInvestmentAmount()
+        {
+            return 18000;
+        }
+
         private static void DownloadInputFiles()
         {
             //var requestUri =
@@ -82,7 +87,7 @@ namespace PortBalance
 
         public static void Go()
 		{ 
-            var newInvestmentAmount = 124000.0m;
+            var newInvestmentAmount = ComputeNewInvestmentAmount();
 		    var liquidateBadSecurities = false;  // sell any Eliminate=true securities from tax-advantaged accounts
 
 		    var targetPercents = new List<InvestmentCategory>
@@ -234,7 +239,8 @@ namespace PortBalance
             var dollarsAllocatedToCategory = targetPercents
                 .Select(e => new CategoryAndAmount(e.Name, 0.0m))
                 .ToDictionary(e => e.Category, e => e.Amount);
-			
+
+            bool showPctDiff = true;
 			while (newInvestmentAmount > 0.0m)
 			{
                 // original $ + allocated $ for all categories
@@ -251,9 +257,21 @@ namespace PortBalance
 					})
 					.ToList();
 
+
                 var pctDiffByCategory = percentByCategory
-                    .Select(e => new { Category = e.Category, PctDiff = e.TargetPercent - e.Percent })
+                    .Select(e => new { Category = e.Category, TargetPct = e.TargetPercent, Pct = e.Percent, PctDiff = (e.TargetPercent - e.Percent) / e.Percent })
 					.ToList();
+
+                if (showPctDiff)
+                {
+                    pctDiffByCategory.ForEach(e => Console.WriteLine("&&& {0} {1} {2} {3}",
+                        StringUtils.MakeFixedWidth(e.Category, 15, false),
+                        StringUtils.MakeFixedWidth(e.TargetPct.ToString("#0.0"), 10, false),
+                        StringUtils.MakeFixedWidth(e.Pct.ToString("#0.0"), 10, false),
+                        StringUtils.MakeFixedWidth(e.PctDiff.ToString("#0.0%"), 10, false)
+                        ));
+                    //showPctDiff = false;
+                }
 
                 var dollarDiffByCategory = pctDiffByCategory.Select(e => new CategoryAndAmount(e.Category, e.PctDiff / 100.0m * totalValueAllCategories)).ToList();
 
@@ -268,6 +286,9 @@ namespace PortBalance
 
                 var categoryNeedsMost = dollarDiffByCategory.OrderByDescending(e => e.Amount).First();
                 var categoryName = categoryNeedsMost.Category;
+
+                Console.WriteLine("Allocating to " + categoryName);
+                Console.WriteLine("----------------------------");
 
                 categoryNeedsMost.Amount = categoryNeedsMost.Amount - slice;
                 dollarsAllocatedToCategory[categoryName] += slice;
