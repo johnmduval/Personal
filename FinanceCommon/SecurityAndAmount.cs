@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PortBalance
+namespace FinanceCommon
 {
     public class SecurityAndAmount
     {
@@ -20,6 +20,21 @@ namespace PortBalance
         }
     }
 
+    public class SecurityAndPrice
+    {
+        public SecurityAndPrice(string security, decimal price)
+        {
+            this.Security = security;
+            this.Price = price;
+        }
+        public string Security { get; private set; }
+        public decimal Price { get; set; }
+        public override string ToString()
+        {
+            return string.Format("{0}: {1}", this.Security, this.Price);
+        }
+    }
+    
     public class CategoryAndAmount
     {
         public CategoryAndAmount(string category, decimal amount)

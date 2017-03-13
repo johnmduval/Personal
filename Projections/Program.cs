@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Excel.FinancialFunctions;
+using FinanceCommon;
 
 namespace Projections
 {
@@ -21,33 +22,32 @@ namespace Projections
             const int deathYear2 = 1970 + deathAge2;
 
             #region current account balances
+            var positionReader = new PositionReader();
+            positionReader.Load();
             // current balances, by tax treatment
             // taxable (brokerage)
-            var taxableAccountValues = new decimal[]
-            {
-                decimal.Parse("1,030,000"),
-            };
-
-            taxableAccountValues[0] -= 450000;
+            var taxableAccountValue = positionReader.GetTaxableAccountsTotal();
 
             // pre-tax (trad)
-            var preTaxAccountValues = new decimal[]
-            {
-                decimal.Parse("426,000"),
-                decimal.Parse("70,000"),
-                decimal.Parse("41,000"),
-                decimal.Parse("426,000"),
-                decimal.Parse("22,000"),
-                decimal.Parse("70,000"),
-                decimal.Parse("319,000"),
-            };
+            var preTaxAccountValue = positionReader.GetPreTaxAccountsTotal();
+            //var preTaxAccountValues = new decimal[]
+            //{
+            //    decimal.Parse("426,000"),
+            //    decimal.Parse("70,000"),
+            //    decimal.Parse("41,000"),
+            //    decimal.Parse("426,000"),
+            //    decimal.Parse("22,000"),
+            //    decimal.Parse("70,000"),
+            //    decimal.Parse("319,000"),
+            //};
 
             // post-tax (roth)
-            var postTaxAccountValues = new decimal[]
-            {
-                decimal.Parse("30,000"),
-                decimal.Parse("40,000"),
-            };
+            var postTaxAccountValue = positionReader.GetPostTaxAccountsTotal();
+            //var postTaxAccountValues = new decimal[]
+            //{
+            //    decimal.Parse("30,000"),
+            //    decimal.Parse("40,000"),
+            //};
             #endregion
 
             decimal annualContributionsTaxable = decimal.Parse("50,000");
@@ -63,7 +63,7 @@ namespace Projections
 
             // ------------------------------------------------
             // post-retirement info
-            const double incomeTaxRetirement = 60;
+            const double incomeTaxRetirement = 39.5;
             const double longTermCapGainsRateRetirement = 20.0;
             var drawdownInfo = new DrawdownInfo
             {
@@ -73,9 +73,9 @@ namespace Projections
 
             var growthInfoList = new List<AccountInfo>
             {
-                new AccountInfo { Desc = "taxable", StartingValue = taxableAccountValues.Sum(), AnnualContributions = annualContributionsTaxable, AnnualReturnPercent = annualReturnPercent, TaxRate = longTermCapGainsRateRetirement },
-                new AccountInfo { Desc = "pretax", StartingValue = preTaxAccountValues.Sum(), AnnualContributions = annualContributionsPretax, AnnualReturnPercent = annualReturnPercent, TaxRate = incomeTaxRetirement },
-                new AccountInfo { Desc = "posttax", StartingValue = postTaxAccountValues.Sum(), AnnualContributions = decimal.Parse("0"), AnnualReturnPercent = annualReturnPercent, TaxRate = 0.0 },
+                new AccountInfo { Desc = "taxable", StartingValue = taxableAccountValue, AnnualContributions = annualContributionsTaxable, AnnualReturnPercent = annualReturnPercent, TaxRate = longTermCapGainsRateRetirement },
+                new AccountInfo { Desc = "pretax", StartingValue = preTaxAccountValue, AnnualContributions = annualContributionsPretax, AnnualReturnPercent = annualReturnPercent, TaxRate = incomeTaxRetirement },
+                new AccountInfo { Desc = "posttax", StartingValue = postTaxAccountValue, AnnualContributions = decimal.Parse("0"), AnnualReturnPercent = annualReturnPercent, TaxRate = 0.0 },
             };
 
             var preRetire = new PreRetirement1();

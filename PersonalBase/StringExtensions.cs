@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PortBalance
+namespace PersonalBase
 {
-	class StringUtils
+	public static class StringExtensions
 	{
-		public static string MakeFixedWidth(string input, int width, bool padRight = true)
+		public static string MakeFixedWidth(this string input, int width, bool padRight = true)
 		{
 			int startIndex = System.Math.Max(0, input.Length - width);
 			string fixedWidth = input.Substring(startIndex);

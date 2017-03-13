@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PersonalBase;
 
 namespace Projections
 {
@@ -35,55 +36,60 @@ namespace Projections
                 this.TaxRate[e] = 0.0;
             });
         }
+        private static List<int> ColumnWidths = new List<int> { 5, 3, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15 };
 
         public static string Header
         {
             get
             {
-                return string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14}",
-                    StringUtils.MakeFixedWidth("Year", 5),
-                    StringUtils.MakeFixedWidth("Age", 3),
-                    StringUtils.MakeFixedWidth("RMD", 15),
+                var columnNames = new List<string>
+                {
+                    "Year",
+                    "Age",
+                    "RMD",
 
-                    StringUtils.MakeFixedWidth("TaxableValue", 15),
-                    StringUtils.MakeFixedWidth("Spent", 15),
-                    StringUtils.MakeFixedWidth("Amt Taxed", 15),
-                    StringUtils.MakeFixedWidth("Tax ", 15),
+                    "TaxableValue",
+                    "Spent",
+                    "Amt Taxed",
+                    "Tax",
                     
-                    StringUtils.MakeFixedWidth("PretaxValue", 15),
-                    StringUtils.MakeFixedWidth("Spent", 15),
-                    StringUtils.MakeFixedWidth("Amt Taxed", 15),
-                    StringUtils.MakeFixedWidth("Tax", 15),
+                    "PretaxValue",
+                    "Spent",
+                    "Amt Taxed",
+                    "Tax",
                     
-                    StringUtils.MakeFixedWidth("PostTaxValue", 15),                    
-                    StringUtils.MakeFixedWidth("Spent", 15),
-                    StringUtils.MakeFixedWidth("Amt Taxed", 15),
-                    StringUtils.MakeFixedWidth("Tax", 15)
-                    );
+                    "PostTaxValue",
+                    "Spent",
+                    "Amt Taxed",
+                    "Tax"
+                };
+                return StringFormatUtils.MakeColumnsFixedWidth(columnNames, ColumnWidths);
             }
         }
         public override string ToString()
         {
-            return string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14}",
-                StringUtils.MakeFixedWidth(Year.ToString(), 5),
-                StringUtils.MakeFixedWidth(Age.ToString(), 3),
-                StringUtils.MakeFixedWidth(Rmd.ToString("C0"), 15),
+            var columnValues = new List<string>
+            {
+                Year.ToString(),
+                Age.ToString(),
+                Rmd.ToString("C0"),
 
-                StringUtils.MakeFixedWidth(CurrentValue["taxable"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(Spent["taxable"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(AmountTaxed["taxable"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(DistributionTaxes["taxable"].ToString("C0"), 15),
+                CurrentValue["taxable"].ToString("C0"),
+                Spent["taxable"].ToString("C0"),
+                AmountTaxed["taxable"].ToString("C0"),
+                DistributionTaxes["taxable"].ToString("C0"),
 
-                StringUtils.MakeFixedWidth(CurrentValue["pretax"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(Spent["pretax"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(AmountTaxed["pretax"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(DistributionTaxes["pretax"].ToString("C0"), 15),
+                CurrentValue["pretax"].ToString("C0"),
+                Spent["pretax"].ToString("C0"),
+                AmountTaxed["pretax"].ToString("C0"),
+                DistributionTaxes["pretax"].ToString("C0"),
 
-                StringUtils.MakeFixedWidth(CurrentValue["posttax"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(Spent["posttax"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(AmountTaxed["posttax"].ToString("C0"), 15),
-                StringUtils.MakeFixedWidth(DistributionTaxes["posttax"].ToString("C0"), 15)
-                );
+                CurrentValue["posttax"].ToString("C0"),
+                Spent["posttax"].ToString("C0"),
+                AmountTaxed["posttax"].ToString("C0"),
+                DistributionTaxes["posttax"].ToString("C0"),
+            };
+            return StringFormatUtils.MakeColumnsFixedWidth(columnValues, ColumnWidths);
         }
     }
 }

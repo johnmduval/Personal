@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B44C5371-8FFC-473D-9275-B6D8A5372C7D}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{CC373264-F6B4-4C2E-809B-5B97A3042972}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Projections</RootNamespace>
-    <AssemblyName>Projections</AssemblyName>
+    <RootNamespace>FinanceCommon</RootNamespace>
+    <AssemblyName>FinanceCommon</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -42,27 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountInfo.cs" />
-    <Compile Include="AnnualDebugInfo.cs" />
-    <Compile Include="DrawdownInfo.cs" />
-    <Compile Include="PostRetirement1.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="PreRetirement1.cs" />
+    <Compile Include="InvestmentCategory.cs" />
+    <Compile Include="Position.cs" />
+    <Compile Include="PositionReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequiredMinimumDistribution.cs" />
+    <Compile Include="SecurityAndAmount.cs" />
+    <Compile Include="SecurityAndExpenseRatio.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ExcelFinancialFunctions\src\ExcelFinancialFunctions\ExcelFinancialFunctions.fsproj">
-      <Project>{8853070c-d0b3-4de6-b80b-b1d10f839359}</Project>
-      <Name>ExcelFinancialFunctions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FinanceCommon\FinanceCommon.csproj">
-      <Project>{cc373264-f6b4-4c2e-809b-5b97a3042972}</Project>
-      <Name>FinanceCommon</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PersonalBase\PersonalBase.csproj">
       <Project>{89e2b37f-6ce7-4e05-9548-6d0745d89989}</Project>
       <Name>PersonalBase</Name>

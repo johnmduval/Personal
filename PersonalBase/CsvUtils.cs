@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace PortBalance
+namespace PersonalBase
 {
 	// http://www.blackbeltcoder.com/Articles/files/reading-and-writing-csv-files-in-c
 

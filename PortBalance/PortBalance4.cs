@@ -1,59 +1,19 @@
-﻿using System;
+﻿using FinanceCommon;
+using PersonalBase;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
+//using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
 
 namespace PortBalance
 {
-
-    // tax efficiency:  https://www.bogleheads.org/wiki/Principles_of_tax-efficient_fund_placement
-    // ___Efficient___ (Place anywhere)
-    //Low-yield money market, cash, short-term bond funds
-    //Tax-managed stock funds
-    //Large-cap and total-market stock index funds
-    //Balanced index funds
-    //Small-cap or mid-cap index funds
-    //Value index funds
-
-    //___Moderately inefficient___
-    //Moderate-yield money market, bond funds
-    //Total-market bond funds
-    //Active stock funds
-
-    //___Very inefficient___  (Place in Tax-Free or Tax-Deferred)
-    //Real estate or REIT funds
-    //High-turnover active funds
-    //High-yield corporate bonds
-
-    public class InvestmentCategory
-    {
-        public string Name { get; set; }
-        public int TaxEfficiency { get; set; }  // lower (1) = not efficient, higher (5) = more efficient
-        public decimal TargetPercent { get; set; }
-        public IEnumerable<SecurityAndExpenseRatio> Securities { get; set; }
-    }
-
-
-    public class SecurityAndExpenseRatio
-    {
-        public string Symbol { get; set; }
-        public decimal ExpenseRatio { get; set; }
-        public string Description { get; set; }
-        public bool Eliminate { get; set; }
-
-        public SecurityAndExpenseRatio()
-        {
-            this.Eliminate = false;
-        }
-    }
-
     public class PortBalance4
 	{
-        private static readonly string inputCsv1 = @"C:\Users\admin\Downloads\john.csv";
-        private static readonly string inputCsv2 = @"C:\Users\admin\Downloads\sue.csv";
+        private static readonly string inputCsv1 = @"C:\Users\John Duval\Downloads\john.csv";
+        private static readonly string inputCsv2 = @"C:\Users\John Duval\Downloads\sue.csv";
 
         private static readonly string[] taxFreeAccounts =
         {
@@ -73,16 +33,7 @@ namespace PortBalance
 
         private static decimal ComputeNewInvestmentAmount()
         {
-            return 18000;
-        }
-
-        private static void DownloadInputFiles()
-        {
-            //var requestUri =
-            //    "https://oltx.fidelity.com/ftgw/fbc/ofpositions/snippet/portfolioPositions?ALL_ACCTS=Y&SAVE_SETTINGS_WASH_SALE=N&UNADJUSTED_COST_BASIS_INFORMATION=&EXCLUDE_WASH_SALE_IND=&SHOW_FOREIGN_CURRENCY=&REFRESH_DATA=N&REPRICE_FROM_CACHE=Y&ALL_POS=Y&ALL_ACCTS=Y&TXN_SORT_ORDER=0&TABLE_SORT_ORDER=0&TABLE_SORT_DIRECTION=A&SAVE_SETTINGS=N&pf=N&CSV=Y&TXN_COLUMN_SORT_JSON_INFO=&SORT_COL_IND=&IS_ACCOUNT_CHANGED=Y&DISP_FULL_DESC=Y&FONT_SIZE=S&viewBy=&displayBy=&group-by=0&desc=0&NEXTGEN=Y&ACTION=&SHOW_FULL_SECURITY_NAME=N&REQUESTED_SHOW_TYPE_IND=All&REQUESTED_SHOW_TYPE_IND=Mutual+Funds&REQUESTED_SHOW_TYPE_IND=CIT%2F529&REQUESTED_SHOW_TYPE_IND=Stocks%2FETFs";
-            //var httpClient = new HttpClient();
-            //var ret = httpClient.GetAsync(requestUri).ConfigureAwait(false);
-            //var x = ret.Wait();
+            return 250000m;
         }
 
         public static void Go()
@@ -149,14 +100,12 @@ namespace PortBalance
             };
 
             // we only fetch prices for securities in the portfolio; if we are buying securities for the first time they must be hard-coded here for now
-		    var newSecurities = new[]
+            var newSecurities = new SecurityAndPrice[]
 		    {
-                //new { Symbol = "VEIEX", LatestPrice = 27.65m },
-                //new { Symbol = "SCHH", LatestPrice = 35.33m },
-		        new { Symbol = "VEA", LatestPrice = 37.27m },
+                //new SecurityAndPrice("VEIEX", 27.65m ),
+                //new SecurityAndPrice("SCHH", 35.33m ),
+                //new SecurityAndPrice("VEA", 37.27m ),
 		    };
-
-
 
             // verify target % adds up to 100%
 		    var totalPct = targetPercents.Sum(e => e.TargetPercent);
@@ -175,22 +124,11 @@ namespace PortBalance
                     securityToCategoryMap.Add(s.Symbol, e.Name);
             });
 
-            DownloadInputFiles();
+            var positionReader = new PositionReader();
+            positionReader.Load();
 
-            // Read all current security positions from CSVs, combine into list of positions, grouped by security symbol
-		    if (!File.Exists(inputCsv1) || !File.Exists(inputCsv2))
-		    {
-		        Console.WriteLine("Input file(s) not found");
-                Console.ReadLine();
-                return;
-		    }
-            var currentPositions1 = ReadCsv(inputCsv1, targetPercents);
-            var currentPositions2 = ReadCsv(inputCsv2, targetPercents, "X10830658");
-
-
-		    var aggregateCurrentPositions = currentPositions1.Union(currentPositions2).ToList();
-            DumpCurrentPositions(aggregateCurrentPositions);
-            AnalyzeTaxEfficiency(aggregateCurrentPositions);
+            DumpCurrentPositions(positionReader.AggregateCurrentPositions);
+            AnalyzeTaxEfficiency(positionReader.AggregateCurrentPositions);
 
             // If you know you're going to be selling some securities (within tax-advantaged accounts, where there is no immediate tax implication), 
             // they will be marked as "Eliminate=true" and we'll add the sale value to newInvestmentAmount
@@ -199,15 +137,15 @@ namespace PortBalance
 		    {
                 Console.WriteLine("Processing securities with Eliminate=true...");
 		        var taxAdvantagedAccounts = taxDeferredAccounts.Union(taxFreeAccounts);
-                newInvestmentAmount += LiquidateBadSecurities(currentPositions1, targetPercents, taxAdvantagedAccounts);
-                newInvestmentAmount += LiquidateBadSecurities(currentPositions2, targetPercents, taxAdvantagedAccounts);
+                newInvestmentAmount += LiquidateBadSecurities(positionReader.CurrentPositions1, targetPercents, taxAdvantagedAccounts);
+                newInvestmentAmount += LiquidateBadSecurities(positionReader.CurrentPositions2, targetPercents, taxAdvantagedAccounts);
                 Console.WriteLine("New investment amount: " + newInvestmentAmount);
             }
-            var expenseRatio = ComputeWeightedExpenseRatio(currentPositions1.Union(currentPositions2), targetPercents);
+            var expenseRatio = ComputeWeightedExpenseRatio(positionReader.CurrentPositions1.Union(positionReader.CurrentPositions2), targetPercents);
             Console.WriteLine("Effective aggregate expense ratio: " + expenseRatio.ToString("#0.000"));
 
-		    var currentPositionsBySecurity = currentPositions1
-		        .Union(currentPositions2)
+            var currentPositionsBySecurity = positionReader.CurrentPositions1
+                .Union(positionReader.CurrentPositions2)
 		        .GroupBy(e => e.Security)
                 .ToList();
 
@@ -233,7 +171,7 @@ namespace PortBalance
             
             // Securities which are not yet in the portfolio need a price:
             foreach (var sec in newSecurities)
-		        priceBySecurity[sec.Symbol] = sec.LatestPrice;
+		        priceBySecurity[sec.Security] = sec.Price;
 
             // this contains a running total of dollars to be allocated to each security (start at 0)
             var dollarsAllocatedToCategory = targetPercents
@@ -265,10 +203,10 @@ namespace PortBalance
                 if (showPctDiff)
                 {
                     pctDiffByCategory.ForEach(e => Console.WriteLine("&&& {0} {1} {2} {3}",
-                        StringUtils.MakeFixedWidth(e.Category, 15, false),
-                        StringUtils.MakeFixedWidth(e.TargetPct.ToString("#0.0"), 10, false),
-                        StringUtils.MakeFixedWidth(e.Pct.ToString("#0.0"), 10, false),
-                        StringUtils.MakeFixedWidth(e.PctDiff.ToString("#0.0%"), 10, false)
+                        e.Category.MakeFixedWidth(15, false),
+                        e.TargetPct.ToString("#0.0").MakeFixedWidth(10, false),
+                        e.Pct.ToString("#0.0").MakeFixedWidth(10, false),
+                        e.PctDiff.ToString("#0.0%").MakeFixedWidth(10, false)
                         ));
                     //showPctDiff = false;
                 }
@@ -301,21 +239,12 @@ namespace PortBalance
 			Console.WriteLine("startingTotal=" + startingTotal);
 			Console.WriteLine("allocatedTotal=" + allocatedTotal);
 
-			Console.WriteLine("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}",
-                StringUtils.MakeFixedWidth("Category", 25, false),
-
-                StringUtils.MakeFixedWidth("Targ%", 7, false),
-                StringUtils.MakeFixedWidth("Orig%", 7, false),
-                StringUtils.MakeFixedWidth("Final%", 7, false),		
-
-				StringUtils.MakeFixedWidth("Orig$", 10, false),
-				StringUtils.MakeFixedWidth("Alloc$", 10, false),
-				StringUtils.MakeFixedWidth("Final$", 10, false),
-
-                StringUtils.MakeFixedWidth("Sec", 7, false),
-				StringUtils.MakeFixedWidth("AllocShr", 10, false),
-				StringUtils.MakeFixedWidth("Price", 10, false)
-			);
+            var columnValues = new List<string>
+            {
+                "Category","Targ%","Orig%","Final%","Orig$","Alloc$","Final$","Sec","AllocShr","Price",
+            };
+            var columnWidths = new List<int> { 25, 7, 7, 7, 10, 10, 10, 7, 10, 10 };
+            Console.WriteLine("{0}", StringFormatUtils.MakeColumnsFixedWidth(columnValues, columnWidths));
 
 		    valuesByCategory.Sort((c1,c2) => String.Compare(c1.Category, c2.Category, StringComparison.Ordinal));
 		    var totalPercentByCategoryGroup = new Dictionary<string, decimal>();
@@ -339,26 +268,28 @@ namespace PortBalance
                 var bestSecSymbol = targetPercents.Single(e => e.Name == cat).Securities.OrderBy(e => e.ExpenseRatio).First().Symbol;
                 var price = priceBySecurity[bestSecSymbol];
                 var allocShr = allocVal / priceBySecurity[bestSecSymbol];
-                
-                Console.WriteLine("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}", 
-					StringUtils.MakeFixedWidth(cat, 25, false),
-					StringUtils.MakeFixedWidth(targetPercents.Single(e => e.Name == cat).TargetPercent.ToString("#0.00"), 7, false),
-                    StringUtils.MakeFixedWidth(startPct.ToString("#0.00"), 7, false),
-                    StringUtils.MakeFixedWidth(finalPct.ToString("#0.00"), 7, false),
-					
-					StringUtils.MakeFixedWidth(startVals.Amount.ToString("#0.00"), 10, false),
-					StringUtils.MakeFixedWidth(allocVal.ToString("#00.00"), 10, false),
-					StringUtils.MakeFixedWidth(finalVal.ToString("#0.00"), 10, false),
 
-                    StringUtils.MakeFixedWidth(bestSecSymbol, 7, false), 
-					StringUtils.MakeFixedWidth(allocShr.ToString("#00.00"), 10, false),
-                    StringUtils.MakeFixedWidth("@" + price.ToString("#0.00"), 10, false)
-					);
+                var outputValues = new List<string>
+                {
+					cat,
+					targetPercents.Single(e => e.Name == cat).TargetPercent.ToString("#0.00"),
+                    startPct.ToString("#0.00"),
+                    finalPct.ToString("#0.00"),
+					
+					startVals.Amount.ToString("#0.00"),
+					allocVal.ToString("#00.00"),
+					finalVal.ToString("#0.00"),
+
+                    bestSecSymbol, 
+					allocShr.ToString("#00.00"),
+                    "@" + price.ToString("#0.00")
+                };
+                Console.WriteLine("{0}", StringFormatUtils.MakeColumnsFixedWidth(outputValues, columnWidths));
 			}
 
 		    foreach (var kvp in totalPercentByCategoryGroup)
 		    {
-		        Console.WriteLine("{0} Total: {1}", StringUtils.MakeFixedWidth(kvp.Key, 25), kvp.Value.ToString("#0.00"));  
+		        Console.WriteLine("{0} Total: {1}", kvp.Key.MakeFixedWidth(25), kvp.Value.ToString("#0.00"));  
 		    }
 
             Console.ReadLine();
@@ -403,20 +334,6 @@ namespace PortBalance
             return weightedTotal;
         }
 
-		private class Position
-		{
-			public string Security { get; set; }
-			public decimal CurrentPrice { get; set; }
-
-			public decimal OriginalQuantity { get; set; }
-
-            public string Account { get; set; }
-
-			public override string ToString()
-			{
-                return string.Format("{0} {1} @ {2} (acct={3})", Security, OriginalQuantity, CurrentPrice, Account);
-			}
-		}
 
 
         private static decimal LiquidateBadSecurities(List<Position> positions, List<InvestmentCategory> categories,
@@ -440,68 +357,5 @@ namespace PortBalance
             return valueOfSoldPositions;
         }
 
-        static List<Position> ReadCsv(string inputCsv, IEnumerable<InvestmentCategory> categories, string ignoreAccount = null)
-		{
-		    if (!File.Exists(inputCsv))
-		        return new List<Position>();
-			var rowList = new List<CsvRow>();
-			using (var reader = new CsvFileReader(inputCsv))
-			{
-				var row = new CsvRow();
-				while (reader.ReadRow(row))
-				{
-					if (row[1] != "Symbol") // skip header row
-                        rowList.Add(row);
-					row = new CsvRow();
-				}
-			}
-
-			// remove rows which are not the securities we're interested in
-            var categorizedSecurityRows = new List<CsvRow>();   // interested in these
-            var uncategorizedSecurityRows = new List<CsvRow>(); // not interested (category unknown)
-            var accountIgnoredRows = new List<CsvRow>();        // not interested (account ignored)
-            var categorizedSecuritySymbols = categories.SelectMany(e => e.Securities.Select(e2 => e2.Symbol));
-            rowList.ForEach(e =>
-            {
-                var account = e[0];
-                var symbol = e[1];
-                if (ignoreAccount != null && account == ignoreAccount)
-                {
-                    accountIgnoredRows.Add(e);
-                    Console.WriteLine("Ignoring: file={0}, acct={1}, symbol={2}", inputCsv, account, symbol);
-                    return;
-                }
-                
-                if (!categorizedSecuritySymbols.Contains(symbol))
-                {
-                    uncategorizedSecurityRows.Add(e);
-                    Console.WriteLine("Uncategorized security: {0}", symbol);
-                    return;
-                }
-                categorizedSecurityRows.Add(e);
-            });
-
-            var positions = categorizedSecurityRows.Select(e => new Position
-			{
-				Security = e[1],
-				OriginalQuantity = decimal.Parse(e[3]),
-                Account = e[0].Trim(),
-			}).ToList();
-
-			var pricesFromSecurities = new Dictionary<string, decimal>();
-            foreach (var row in categorizedSecurityRows)
-			{
-				var security = row[1];
-				if (pricesFromSecurities.ContainsKey(security))
-					continue;
-			    var priceString = row[4].Trim(new[] {'$'});
-                var currentPrice = decimal.Parse(priceString);
-
-				var positionsForSec = positions.Where(e => e.Security == security).ToList();
-				positionsForSec.ForEach(e => e.CurrentPrice = currentPrice);
-			}
-
-			return positions;
-		}
 	}
 }
