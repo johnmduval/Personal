@@ -12,8 +12,8 @@ namespace PortBalance
 {
     public class PortBalance4
 	{
-        private static readonly string inputCsv1 = @"C:\Users\John Duval\Downloads\john.csv";
-        private static readonly string inputCsv2 = @"C:\Users\John Duval\Downloads\sue.csv";
+        //private static readonly string inputCsv1 = @"C:\Users\JohnDuval\Downloads\john.csv";
+        //private static readonly string inputCsv2 = @"C:\Users\JohnDuval\Downloads\sue.csv";
 
         private static readonly string[] taxFreeAccounts =
         {
@@ -33,7 +33,7 @@ namespace PortBalance
 
         private static decimal ComputeNewInvestmentAmount()
         {
-            return 250000m;
+            return 421000m;
         }
 
         public static void Go()
@@ -92,7 +92,8 @@ namespace PortBalance
 
                 // Other
 		        new InvestmentCategory { Name = "9a Money Market/Cash", TargetPercent = 0.0m, TaxEfficiency = 5,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "FTEXX**", ExpenseRatio = 0.09m, Description = "Municipal Money Market"},
+		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "SPAXX**", ExpenseRatio = 0.42m, Description = "Government Money Market Fund"},
+                                         new SecurityAndExpenseRatio {Symbol = "FTEXX**", ExpenseRatio = 0.4m, Description = "Municipal Money Market"},
 		                                 new SecurityAndExpenseRatio {Symbol = "FDRXX**", ExpenseRatio = 0.24m, Description = "Cash Reserves"}, 
 		                                 new SecurityAndExpenseRatio {Symbol = "CORE**", ExpenseRatio = 0.00M, Description = "FDIC-INSURED DEPOSIT SWEEP"}, 
                     }
@@ -168,10 +169,16 @@ namespace PortBalance
                 }
                 categoryAndAmount.Amount += positionGroup.Sum(e => e.OriginalQuantity * e.CurrentPrice);
             }
-            
+
+            bool investmentComingFromMoneyMarket = true;
+            if (investmentComingFromMoneyMarket)
+            {
+                valuesByCategory.Single(e => e.Category.Contains("Money Market")).Amount -= newInvestmentAmount;
+            }
+
             // Securities which are not yet in the portfolio need a price:
             foreach (var sec in newSecurities)
-		        priceBySecurity[sec.Security] = sec.Price;
+		    priceBySecurity[sec.Security] = sec.Price;
 
             // this contains a running total of dollars to be allocated to each security (start at 0)
             var dollarsAllocatedToCategory = targetPercents

@@ -38,8 +38,8 @@ namespace FinanceCommon
             return total;
         }
 
-        private static readonly string inputCsv1 = @"C:\Users\John Duval\Downloads\john.csv";
-        private static readonly string inputCsv2 = @"C:\Users\John Duval\Downloads\sue.csv";
+        private static readonly string inputCsv1 = @"C:\Users\JohnDuval\Downloads\john.csv";
+        private static readonly string inputCsv2 = @"C:\Users\JohnDuval\Downloads\sue.csv";
 
         private List<string> _taxableAccounts = new List<string>
         {
