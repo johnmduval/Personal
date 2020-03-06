@@ -66,6 +66,8 @@ namespace FinanceCommon
 
         private List<Position> ReadCsv(string inputCsv, IEnumerable<InvestmentCategory> categories, string ignoreAccount = null)
         {
+            Console.WriteLine($"Reading CSV: {inputCsv}");
+
             if (!File.Exists(inputCsv))
                 return new List<Position>();
             var rowList = new List<CsvRow>();
@@ -88,18 +90,19 @@ namespace FinanceCommon
             rowList.ForEach(e =>
             {
                 var account = e[0];
+                e[1] = e[1].TrimEnd(new[] { '*' });
                 var symbol = e[1];
                 if (ignoreAccount != null && account == ignoreAccount)
                 {
                     accountIgnoredRows.Add(e);
-                    Console.WriteLine("Ignoring: file={0}, acct={1}, symbol={2}", inputCsv, account, symbol);
+                    Console.WriteLine("  Ignoring: file={0}, acct={1}, symbol={2}", inputCsv, account, symbol);
                     return;
                 }
 
                 if (!categorizedSecuritySymbols.Contains(symbol))
                 {
                     uncategorizedSecurityRows.Add(e);
-                    Console.WriteLine("Uncategorized security: {0}", symbol);
+                    Console.WriteLine("  Uncategorized security: {0}", symbol);
                     return;
                 }
                 categorizedSecurityRows.Add(e);
@@ -107,7 +110,7 @@ namespace FinanceCommon
 
             var positions = categorizedSecurityRows.Select(e => new Position
             {
-                Security = e[1],
+                Security = e[1].TrimEnd(new[] { '*' }),
                 OriginalQuantity = decimal.Parse(e[3]),
                 Account = e[0].Trim(),
             }).ToList();

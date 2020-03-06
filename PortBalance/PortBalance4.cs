@@ -12,9 +12,6 @@ namespace PortBalance
 {
     public class PortBalance4
 	{
-        //private static readonly string inputCsv1 = @"C:\Users\JohnDuval\Downloads\john.csv";
-        //private static readonly string inputCsv2 = @"C:\Users\JohnDuval\Downloads\sue.csv";
-
         private static readonly string[] taxFreeAccounts =
         {
             "130392103", // john roth
@@ -33,72 +30,13 @@ namespace PortBalance
 
         private static decimal ComputeNewInvestmentAmount()
         {
-            return 421000m;
+            return 255000m;
         }
 
         public static void Go()
 		{ 
             var newInvestmentAmount = ComputeNewInvestmentAmount();
 		    var liquidateBadSecurities = false;  // sell any Eliminate=true securities from tax-advantaged accounts
-
-		    var targetPercents = new List<InvestmentCategory>
-		    {
-                // U.S. stocks
-		        new InvestmentCategory { Name = "1 US Large Cap", TargetPercent = 15.0m, TaxEfficiency = 3,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "SPY", ExpenseRatio = 0.09m, Description = "S&P 500"},
-                                         //new SecurityAndExpenseRatio {Symbol = "PEOPX", ExpenseRatio = 0.50m, Description = "S&P 500", Eliminate = true },
-                                         //new SecurityAndExpenseRatio {Symbol = "FBGRX", ExpenseRatio = 0.74m, Description = "Blue Chip", Eliminate = true },
-		                                 new SecurityAndExpenseRatio {Symbol = "FUSVX", ExpenseRatio = 0.05m, Description = "S&P 500 80%"}, }   // Sue 401k
-		        },
-		        new InvestmentCategory { Name = "2 US Broad Mkt", TargetPercent = 15.0m, TaxEfficiency = 3,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "IWV", ExpenseRatio = 0.20m, Description = "Russell 3000", Eliminate = true }, 
-		                                 new SecurityAndExpenseRatio {Symbol = "FSEVX", ExpenseRatio = 0.07m, Description = "Mid / Small Cap"}, }
-		        },
-                new InvestmentCategory { Name = "3 US Small Cap", TargetPercent = 15.0m, TaxEfficiency = 4,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "IJR", ExpenseRatio = 0.12m, Description = "S&P SmallCap 600"}, }
-		        },
-                new InvestmentCategory { Name = "4 US Real Estate", TargetPercent = 7.0m, TaxEfficiency = 2,
-		            Securities = new[] { //new SecurityAndExpenseRatio {Symbol = "IYR", ExpenseRatio = 0.46m, Description = "Dow Jones U.S. Real Estate Index", Eliminate = true},
-		                                 new SecurityAndExpenseRatio {Symbol = "SCHH", ExpenseRatio = 0.07m, Description = "U.S. Select REIT Index"}, }
-		        },
-
-                // International stocks
-                new InvestmentCategory { Name = "5 Intl Large/Mid Cap", TargetPercent = 15.0m, TaxEfficiency = 5,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "ACWX", ExpenseRatio = 0.34m, Description = "All Country World Index (ACWI)", Eliminate = true },
-                                         new SecurityAndExpenseRatio {Symbol = "VEA", ExpenseRatio = 0.09m, Description = "FTSE Developed ex North America Index" },
-		                                 new SecurityAndExpenseRatio {Symbol = "VTMGX", ExpenseRatio = 0.09m, Description = "FTSE Developed ex North America Index"}, }     // Sue 401k
-		        },
-                new InvestmentCategory { Name = "6 Intl Small Cap", TargetPercent = 7.0m, TaxEfficiency = 5,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "SCZ", ExpenseRatio = 0.40m, Description = "Europe Asia Far East (EAFE) Small Cap"}, }
-		        },
-                new InvestmentCategory { Name = "7 Intl BRIC", TargetPercent = 7.0m, TaxEfficiency = 5,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "VEIEX", ExpenseRatio = 0.33m, Description = "Brazil Russia India China"},
-                                         //new SecurityAndExpenseRatio {Symbol = "BKF", ExpenseRatio = 0.67m, Description = "Brazil Russia India China", Eliminate = true }, 
-                    }
-		        },
-
-                // U.S. bonds
-                new InvestmentCategory { Name = "8 Bonds", TargetPercent = 13.0m, TaxEfficiency = 1,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "AGG", ExpenseRatio = 0.08m, Description = "iShares Core US Aggregate Bond"},
-		                                 new SecurityAndExpenseRatio {Symbol = "FSITX", ExpenseRatio = 0.10m, Description = "Fidelity Spartan US Bond Idx Advtg"}, }    // Sue 401k
-		        },
-                //new InvestmentCategory { Name = "8a High-Yield Bonds", TargetPercent = 5.0m, TaxEfficiency = 1,
-                //    Securities = new[] { new SecurityAndExpenseRatio {Symbol = "???", ExpenseRatio = 0.00m, Description = "Barclays U.S. Aggregate Bond Index"},
-                //    }
-                //},
-                new InvestmentCategory { Name = "9 Inflation Protected", TargetPercent = 6.0m, TaxEfficiency = 1,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "TIP", ExpenseRatio = 0.20m, Description = "U.S. Treasury Inflation Protected Securities"}, }
-		        },
-
-                // Other
-		        new InvestmentCategory { Name = "9a Money Market/Cash", TargetPercent = 0.0m, TaxEfficiency = 5,
-		            Securities = new[] { new SecurityAndExpenseRatio {Symbol = "SPAXX**", ExpenseRatio = 0.42m, Description = "Government Money Market Fund"},
-                                         new SecurityAndExpenseRatio {Symbol = "FTEXX**", ExpenseRatio = 0.4m, Description = "Municipal Money Market"},
-		                                 new SecurityAndExpenseRatio {Symbol = "FDRXX**", ExpenseRatio = 0.24m, Description = "Cash Reserves"}, 
-		                                 new SecurityAndExpenseRatio {Symbol = "CORE**", ExpenseRatio = 0.00M, Description = "FDIC-INSURED DEPOSIT SWEEP"}, 
-                    }
-		        },
-            };
 
             // we only fetch prices for securities in the portfolio; if we are buying securities for the first time they must be hard-coded here for now
             var newSecurities = new SecurityAndPrice[]
@@ -109,7 +47,7 @@ namespace PortBalance
 		    };
 
             // verify target % adds up to 100%
-		    var totalPct = targetPercents.Sum(e => e.TargetPercent);
+		    var totalPct = InvestmentCategoryTargets.Instance.Targets.Sum(e => e.TargetPercent);
 		    if (totalPct != 100.0m)
 		    {
 		        Console.WriteLine("Target percentages ({0}) don't add up to 100%", totalPct);
@@ -119,7 +57,7 @@ namespace PortBalance
 
             // Build map [security symbol] -> [category name]
 		    var securityToCategoryMap = new Dictionary<string, string>();
-            targetPercents.ForEach(e =>
+            InvestmentCategoryTargets.Instance.Targets.ForEach(e =>
             {
                 foreach (var s in e.Securities)
                     securityToCategoryMap.Add(s.Symbol, e.Name);
@@ -138,11 +76,11 @@ namespace PortBalance
 		    {
                 Console.WriteLine("Processing securities with Eliminate=true...");
 		        var taxAdvantagedAccounts = taxDeferredAccounts.Union(taxFreeAccounts);
-                newInvestmentAmount += LiquidateBadSecurities(positionReader.CurrentPositions1, targetPercents, taxAdvantagedAccounts);
-                newInvestmentAmount += LiquidateBadSecurities(positionReader.CurrentPositions2, targetPercents, taxAdvantagedAccounts);
+                newInvestmentAmount += LiquidateBadSecurities(positionReader.CurrentPositions1, InvestmentCategoryTargets.Instance.Targets, taxAdvantagedAccounts);
+                newInvestmentAmount += LiquidateBadSecurities(positionReader.CurrentPositions2, InvestmentCategoryTargets.Instance.Targets, taxAdvantagedAccounts);
                 Console.WriteLine("New investment amount: " + newInvestmentAmount);
             }
-            var expenseRatio = ComputeWeightedExpenseRatio(positionReader.CurrentPositions1.Union(positionReader.CurrentPositions2), targetPercents);
+            var expenseRatio = ComputeWeightedExpenseRatio(positionReader.CurrentPositions1.Union(positionReader.CurrentPositions2), InvestmentCategoryTargets.Instance.Targets);
             Console.WriteLine("Effective aggregate expense ratio: " + expenseRatio.ToString("#0.000"));
 
             var currentPositionsBySecurity = positionReader.CurrentPositions1
@@ -158,7 +96,12 @@ namespace PortBalance
             {
                 var securitySymbol = positionGroup.Key;
                 if (!priceBySecurity.ContainsKey(securitySymbol))
-                    priceBySecurity.Add(securitySymbol, positionGroup.First().CurrentPrice);
+                {
+                    var currentPrice = positionGroup.First().CurrentPrice;
+                    if (currentPrice == 0m)
+                        throw new Exception("Price can't be zero!");
+                    priceBySecurity.Add(securitySymbol, currentPrice);
+                }
 
                 var category = securityToCategoryMap[securitySymbol];
                 var categoryAndAmount = valuesByCategory.SingleOrDefault(e => e.Category == category);
@@ -181,11 +124,11 @@ namespace PortBalance
 		    priceBySecurity[sec.Security] = sec.Price;
 
             // this contains a running total of dollars to be allocated to each security (start at 0)
-            var dollarsAllocatedToCategory = targetPercents
+            var dollarsAllocatedToCategory = InvestmentCategoryTargets.Instance.Targets
                 .Select(e => new CategoryAndAmount(e.Name, 0.0m))
                 .ToDictionary(e => e.Category, e => e.Amount);
 
-            bool showPctDiff = true;
+            bool showPctDiff = false;
 			while (newInvestmentAmount > 0.0m)
 			{
                 // original $ + allocated $ for all categories
@@ -197,7 +140,7 @@ namespace PortBalance
 					.Select(e => 
 					{
                         var totalForCategory = e.Amount + dollarsAllocatedToCategory[e.Category];
-					    var category = targetPercents.Single(e2 => e2.Name == e.Category);
+					    var category = InvestmentCategoryTargets.Instance.Targets.Single(e2 => e2.Name == e.Category);
                         return new { Category = e.Category, Percent = totalForCategory / totalValueAllCategories * 100.0m, TargetPercent = category.TargetPercent };
 					})
 					.ToList();
@@ -232,8 +175,11 @@ namespace PortBalance
                 var categoryNeedsMost = dollarDiffByCategory.OrderByDescending(e => e.Amount).First();
                 var categoryName = categoryNeedsMost.Category;
 
-                Console.WriteLine("Allocating to " + categoryName);
-                Console.WriteLine("----------------------------");
+                if (showPctDiff)
+                {
+                    Console.WriteLine("Allocating to " + categoryName);
+                    Console.WriteLine("----------------------------");
+                }
 
                 categoryNeedsMost.Amount = categoryNeedsMost.Amount - slice;
                 dollarsAllocatedToCategory[categoryName] += slice;
@@ -248,7 +194,7 @@ namespace PortBalance
 
             var columnValues = new List<string>
             {
-                "Category","Targ%","Orig%","Final%","Orig$","Alloc$","Final$","Sec","AllocShr","Price",
+                "Category","Targ%","Orig%","Final%","$Orig","$Alloc","$Final","Sec","AllocShr","Price",
             };
             var columnWidths = new List<int> { 25, 7, 7, 7, 10, 10, 10, 7, 10, 10 };
             Console.WriteLine("{0}", StringFormatUtils.MakeColumnsFixedWidth(columnValues, columnWidths));
@@ -272,14 +218,14 @@ namespace PortBalance
 			    totalPercentByCategoryGroup[catGroup] += finalPct;
 
                 // select the best security in the category (by selecting lowest ER)
-                var bestSecSymbol = targetPercents.Single(e => e.Name == cat).Securities.OrderBy(e => e.ExpenseRatio).First().Symbol;
+                var bestSecSymbol = InvestmentCategoryTargets.Instance.Targets.Single(e => e.Name == cat).Securities.Where(e => e.Symbol != "CORE").OrderBy(e => e.ExpenseRatio).First().Symbol;
                 var price = priceBySecurity[bestSecSymbol];
                 var allocShr = allocVal / priceBySecurity[bestSecSymbol];
 
                 var outputValues = new List<string>
                 {
 					cat,
-					targetPercents.Single(e => e.Name == cat).TargetPercent.ToString("#0.00"),
+                    InvestmentCategoryTargets.Instance.Targets.Single(e => e.Name == cat).TargetPercent.ToString("#0.00"),
                     startPct.ToString("#0.00"),
                     finalPct.ToString("#0.00"),
 					
@@ -289,7 +235,7 @@ namespace PortBalance
 
                     bestSecSymbol, 
 					allocShr.ToString("#00.00"),
-                    "@" + price.ToString("#0.00")
+                    price.ToString("#0.00")
                 };
                 Console.WriteLine("{0}", StringFormatUtils.MakeColumnsFixedWidth(outputValues, columnWidths));
 			}
@@ -304,12 +250,20 @@ namespace PortBalance
 
         private static void DumpCurrentPositions(List<Position> positions)
         {
+            var secCol = "Security".MakeFixedWidth(10);
+            var valCol = "Value".MakeFixedWidth(10);
+            var acctCol = "Account".MakeFixedWidth(10);
+            Console.WriteLine($"  {secCol}\t{valCol}\t{acctCol}");
             positions.Sort((a,b) => a.Security.CompareTo(b.Security));
             positions.ForEach(e =>
             {
-                Console.WriteLine("{0}\t{1}\t{2}", e.Security, e.OriginalQuantity * e.CurrentPrice, e.Account);
+                var sec = e.Security.MakeFixedWidth(10);
+                var position = (e.OriginalQuantity * e.CurrentPrice).ToString("$0.00").MakeFixedWidth(10, false);
+                var acct = e.Account.MakeFixedWidth(10);
+                Console.WriteLine($"  {sec}\t{position}\t{acct}");
             });
         }
+
         private static void AnalyzeTaxEfficiency(List<Position> positions)
         {
             // group each position by tax efficiency & account type (taxable, tax-deferred, tax-free)

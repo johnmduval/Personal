@@ -9,7 +9,17 @@ namespace FinanceCommon
     public class Position
     {
         public string Security { get; set; }
-        public decimal CurrentPrice { get; set; }
+        private decimal _cp;
+        public decimal CurrentPrice 
+        {
+            get { return _cp; } 
+            set 
+            {
+                if (value == 0m)
+                    throw new Exception("Price cannot be zero!");
+                _cp = value; 
+            }
+        }
 
         public decimal OriginalQuantity { get; set; }
 
