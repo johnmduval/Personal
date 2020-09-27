@@ -2,7 +2,7 @@
 #include <TM1637Display.h>
 // TM1637 Display connection PINs & initialization:
 #define CLK 2
-#define DIO 3
+#define DIO 4
 TM1637Display display = TM1637Display(CLK, DIO);
 
 // L298n Dual H-bridge motor driver
@@ -16,7 +16,6 @@ byte fasterButtonPin = 6;
 int slowerButtonPin = 3;
 int offButtonPin = 5;
 
-//unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 unsigned long debounceDelay = 50;    // the debounce time; increase if get flickers
 
 int motorSpeed = 0;
@@ -32,7 +31,7 @@ class DebounceButton {
     int pin;
     int state;
     int lastState;
-    long lastDebounceTime;
+    long lastDebounceTime;  // the last time the output pin was toggled
     int motorSpeedDelta;
     String buttonName;
     
@@ -84,8 +83,6 @@ DebounceButton FasterBtn(6, 4, String("faster"));
 DebounceButton SlowerBtn(3, -2, String("slower"));
 DebounceButton StopBtn(5, 0, String("stop"));
 
-
-
 void setup() {
   pinMode(in1, OUTPUT); //Declaring the pin modes, obviously they're outputs
   pinMode(in2, OUTPUT);
@@ -93,6 +90,9 @@ void setup() {
 
   Serial.begin(9600);
   Serial.println("Starting up dude");
+
+  display.setBrightness(3);
+  display.clear();
 }
 
 void SetMotorSpeed(){
@@ -119,5 +119,6 @@ void loop() {
     SetMotorSpeed();
   }
 
+  display.showNumberDec(motorSpeed);
   //delay(2000);
 }
