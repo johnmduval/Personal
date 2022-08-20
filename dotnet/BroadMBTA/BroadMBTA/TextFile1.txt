@@ -1,0 +1,3 @@
+﻿
+- surprised there is no way to include all of a route's stops without also specifying stop filter
+
